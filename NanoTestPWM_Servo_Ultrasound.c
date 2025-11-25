@@ -7,6 +7,8 @@ float distance = 0;
 int idist = 0;
 Servo myservo;
 UltraSonicDistanceSensor distanceSensor(18, 19);  // Initialize sensor that uses digital pins 13 and 12.
+unsigned long previousMeasurementMillis = 0;
+const unsigned long measurementInterval = 50;
 
 void setup () {
     pinMode(LED, OUTPUT);
@@ -16,15 +18,19 @@ void setup () {
 }
 
 void loop () {
-    // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
-    distance = distanceSensor.measureDistanceCm();
-    if (distance > 0){
-   // Serial.println(distance);
-    idist = int(distance);
-    Serial.println(idist);
-        analogWrite(LED,idist);
-        myservo.write(int(distance)*2);
-    }
-    delay(50);
+    const unsigned long currentMillis = millis();
 
+    if (currentMillis - previousMeasurementMillis >= measurementInterval) {
+        previousMeasurementMillis = currentMillis;
+
+        // Every 50 milliseconds, do a measurement using the sensor and print the distance in centimeters.
+        distance = distanceSensor.measureDistanceCm();
+        if (distance > 0) {
+            // Serial.println(distance);
+            idist = int(distance);
+            Serial.println(idist);
+            analogWrite(LED, idist);
+            myservo.write(int(distance) * 2);
+        }
+    }
 }
